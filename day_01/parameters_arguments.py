@@ -169,3 +169,143 @@ for uid, n, r in zip(user_ids, names, roles):
     user_dict = create_user(uid, n, r)
     database.append(user_dict)
 print(database)
+
+# ── 13. CALCULATE STATS ────────────────────────────────────────
+# Returns min, max and average of a list in one dictionary
+# Guard clause handles empty list — avoids crashes on bad input
+# min() and max() are Python built-ins — no loop needed
+def calculate_stats(numbers):
+    if not numbers:
+        return {"min": None, "max": None, "avg": 0}
+    minimum=min(numbers)
+    maximum=max(numbers)
+    average=get_average(numbers)
+    return{
+        "min":minimum,
+        "max":maximum,
+        "avg":average
+    }
+data=[10,20,30,40,50,60,70,80,90,100]
+print(calculate_stats(data))
+
+# ── 14. COUNT FREQUENCIES ─────────────────────────────────────
+# Counts how many times each item appears in a list
+# dict.get(key, default) — returns 0 if key doesn't exist yet
+# This pattern is used in log analysis and data profiling in DE
+def count_frequencies(items):
+    dict={}
+    for i in items:
+        dict[i]=dict.get(i,0)+1
+    return dict
+counts=['apple','banana','mango','guava','orange','mango','apple']
+print(count_frequencies(counts))
+
+# ── 15. MERGE CONFIGS ─────────────────────────────────────────
+# Merges two config dictionaries — user settings override defaults
+# .copy() creates a new dict so original is not modified
+# .update() adds/overwrites keys from config2 into new_config
+# Real DE use case: merging default pipeline configs with env-specific ones
+def merge_configs(config1,config2):
+    new_config=config1.copy()
+    new_config.update(config2)
+    return new_config
+default_settings = {
+    "theme": "light",
+    "font_size": 12,
+    "show_notifications": True
+}
+user_settings = {
+    "theme": "dark",        # Shared key: should overwrite "light"
+    "font_size": 14,       # Shared key: should overwrite 12
+    "username": "coder_42" # Unique key: should be added
+}
+result = merge_configs(default_settings, user_settings)
+print(result)
+
+# ── 16. INVERT MAPPING ────────────────────────────────────────
+# Flips a dictionary where values are lists into item → group
+# Outer loop: goes through each group
+# Inner loop: goes through each item in that group's list
+# Real DE use: inverting category mappings, tag lookups, label encoding
+def invert_mapping(mapping):
+    inverted = {}
+    for group, items in mapping.items():
+        for item in items:
+            inverted[item] = group
+    return inverted
+original = {
+    "group_a": [1, 2],
+    "group_b": [3]
+}
+print(invert_mapping(original))
+
+# ── 17. CLEAN TEXT ────────────────────────────────────────────
+# Cleans raw text by lowercasing and removing special characters
+# .strip() removes leading/trailing whitespace
+# .lower() converts everything to lowercase
+# re.sub() replaces anything that is NOT a-z, 0-9, or space with ''
+# Real DE use: cleaning text columns before NLP or loading into DB
+import re
+def clean_text(text):
+    text=text.strip().lower()
+    clean_string = re.sub(r'[^a-z0-9 ]', '', text)
+    return clean_string
+word="i love playingCRICKET !@# 2026 %% &&"
+print(clean_text(word))
+
+# ── 18. CLEAN CURRENCY (Simple Replace Method) ────────────────
+# Removes $ and , from currency strings and converts to float
+# .replace() is simpler and more readable than regex for this case
+# Real DE use: cleaning financial data before calculations or DB insert
+def clean_currency(value_str):
+    value_str=re.sub(r'[^a-z0-9 .]', '', value_str)
+    value=float(value_str)
+    return value
+amount="$1234.5678"
+print(clean_currency(amount))
+
+
+def clean_currency(value_str):
+    # Replace the $ and the , with nothing (an empty string)
+    cleaned_str = value_str.replace("$", "").replace(",", "")
+    return float(cleaned_str)
+amount = "$1,234.5678"
+print(clean_currency(amount))
+
+# ── 19. FILL MISSING VALUES ───────────────────────────────────
+# Replaces None values in a list of dictionaries with a fill value
+# Outer loop: goes through each row (dictionary)
+# Inner loop: checks every key-value pair in the row
+# None check: if value is None, replace it with fill_value
+# Real DE use: handling NULL values in API responses or CSV imports
+def fill_missing_values(data_list,fill_value):
+    for row in data_list:
+        for key, value in row.items():
+            if value is None:
+                row[key] = fill_value
+    return data_list
+messy_api_data = [
+    {"user": "alice", "age": 28, "status": "active"},
+    {"user": "bob", "age": None, "status": "pending"},
+    {"user": "charlie", "age": 35, "status": None}
+]
+cleaned_data = fill_missing_values(messy_api_data, "UNKNOWN")
+for item in cleaned_data:
+    print(item)
+
+# ── 20. STANDARDIZE DATES ─────────────────────────────────────
+# Converts dates from MM/DD/YYYY format to YYYY-MM-DD (ISO standard)
+# strptime() = parses a string into a datetime object using a format
+# strftime() = formats a datetime object back into a string
+# %m=month, %d=day, %Y=4-digit year
+# Real DE use: normalizing date formats before loading into databases
+from datetime import datetime
+def standardize_dates(date_list):
+    clean_dates = []
+    for date_str in date_list:
+        parsed_date = datetime.strptime(date_str, "%m/%d/%Y")
+        new_date_str = parsed_date.strftime("%Y-%m-%d")
+        clean_dates.append(new_date_str)
+    return clean_dates
+messy_dates = ["12/31/2023", "01/15/2024", "07/04/2024"]
+print(standardize_dates(messy_dates))
